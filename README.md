@@ -20,7 +20,9 @@ Randomization (MR). This enables a clear distinction between:
 
 By addressing the limitations of conventional approaches, the HVP
 package offers a robust framework for analyzing complex genetic
-relationships. \## Installation
+relationships.
+
+## Installation
 
 You can install the development version of HVPSUM from
 [GitHub](https://github.com/) with:
@@ -46,8 +48,8 @@ devtools::install_github("lamessad/HVPSUM")
 - This package operates in two distinct modes, and the required
   **inputs** depend on the selected mode:
 
-- 1.  `LDSC Mode`: In this mode, the package performs LDSC analysis to
-      compute delete values for the input summary statistics. The
+- 1.  `**LDSC Mode**`: In this mode, the package performs LDSC analysis
+      to compute delete values for the input summary statistics. The
       following inputs must be provided:
 
   - `ldsc_env_path`: Path to the LDSC environment.
@@ -59,8 +61,8 @@ devtools::install_github("lamessad/HVPSUM")
 When these paths are provided, the package will execute LDSC analysis
 and compute the necessary delete values.
 
-- 2.  `Pre-computed Mode`: In this mode, the package performs the
-      analysis without running LDSC in this rpackge. Instead, it uses
+- 2.  `**Pre-computed Mode**`: In this mode, the package performs the
+      analysis without running LDSC in this rpackage. Instead, it uses
       pre-computed delete values from LDSC computed else where. The
       following inputs must be provided:
 
@@ -77,14 +79,44 @@ includes both LDSC and corrected for heritability, genetic covaraince,
 and genetic correlation.
 
 ``` r
-#library(HVPSUM)
-#data(c("dat1", "dat2", "dat3"))
-#head(dat1)
-#head(dat2)
-#head(dat3)
-#tau <- 0.21
-#results <- hvpsum(h21block_path = "dat1", h22block_path = "dat2", gen_cov_path = "dat3",tau=tau)
+library(HVPSUM)
+data("dat1")#
+data("dat2")
+data("dat3")
+head(dat1)
+#>           V1
+#> 1 0.07696392
+#> 2 0.07642106
+#> 3 0.07556504
+#> 4 0.07559329
+#> 5 0.07599179
+#> 6 0.07575593
+head(dat2)
+#>           V1
+#> 1 0.04595247
+#> 2 0.04651566
+#> 3 0.04587754
+#> 4 0.04633127
+#> 5 0.04651247
+#> 6 0.04634499
+head(dat3)
+#>           V1
+#> 1 0.04297810
+#> 2 0.04307912
+#> 3 0.04293479
+#> 4 0.04297755
+#> 5 0.04302241
+#> 6 0.04294928
+tau <- 0.21
+#results <- hvpsum(h21block_path = "path/to/file1.hsq1.delete", h22block_path = "path/to/file2.hsq2.delete", gen_cov_path = "path/to/file3.gencov.delete",tau=tau)
 #results
+#Heritability 1: Estimate = 0.0991 SE = 0.0309 P-value = 0.001333
+#Heritability 1 Corrected: Estimate = 0.1005 SE = 0.0313 P-value = 0.0013128
+#Heritability 2: Estimate = 0.0753 SE = 0.0086 P-value = < 2.22e-16
+#Genetic Covariance: Estimate = -0.0045 SE = 0.0049 P-value = 0.35232
+#Genetic Covariance Corrected: Estimate = 0.0113 SE = 0.005 P-value = 0.023646
+#Genetic Correlation: Estimate = -0.0523 SE = 0.0588 P-value = 0.37434
+#Genetic Correlation: Estimate = 0.1299 SE = 0.0553 P-value = 0.01876
 ```
 
 ## Contact
