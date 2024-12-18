@@ -131,6 +131,7 @@ tau, intern = TRUE) {
   if (!is.null(ldsc_env_path) && !is.null(ldsc_exe_path) && !is.null(ld_path)) {
     
     message("Running LDSC analysis...")
+    Sys.setenv(PYTHONWARNINGS = "ignore::FutureWarning")
     ldsc_results <- run_ldsc(ldsc_env_path, ldsc_exe_path, ld_path, sumstats1, sumstats2)
     
     h21block_path <- ldsc_results[[1]]
