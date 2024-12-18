@@ -1,0 +1,14 @@
+Package: HVPSUM
+Title: Genetic Correlation
+Version: 0.0.0.9000
+Authors@R: 
+    c(person("Hong", "Lee", role = c("aut","cph"),email = "Hong.Lee@unisa.edu.au"),
+             person("Lamessa", "Amente", role = c("aut", "cre","cph"), email = "dubelamessa@gmail.com"))
+Description: This function applies the HVP model to disentangle horizontal pleiotropy effects from vertical pleiotropy using GWAS summary data. It corrects genetic correlation estimates derived from cross-trait LD-score regression (LDSC). 
+License: GPL (>=3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends: 
+    R (>= 2.10)
+LazyData: true
