@@ -10,66 +10,61 @@ hvpsum(
   ld_path = NULL,
   sumstats1 = NULL,
   sumstats2 = NULL,
-  h21block_path = NULL,
-  h22block_path = NULL,
-  gen_cov_path = NULL,
+  h21_data = NULL,
+  h22_data = NULL,
+  gencov_data = NULL,
   tau,
   intern = TRUE
 )
 }
 \arguments{
-\item{ldsc_env_path}{Path to the LDSC environment.}
+\item{ldsc_env_path}{Character string. The path to the environment where LDSC is installed.}
 
-\item{ldsc_exe_path}{Path to the LDSC executable script.}
+\item{ldsc_exe_path}{Character string. The path to the LDSC executable.}
 
-\item{ld_path}{Path to the reference LD files.}
+\item{ld_path}{Character string. The path to the reference LD blocks.}
 
-\item{sumstats1}{Path to the first trait munged summary statistics file (outcome).}
+\item{sumstats1}{Character string. Path to the first summary statistics file (e.g., .sumstats.gz).}
 
-\item{sumstats2}{Path to the second trait munged summary statistics file(exposure).}
+\item{sumstats2}{Character string. Path to the second summary statistics file (e.g., .sumstats.gz).}
 
-\item{h21block_path}{Path to the pre-computed jackknife blocks estimate  for the heritability of trait 1.}
+\item{h21_data}{Data frame or vector. Precomputed heritability estimates for the first trait.
+If \code{NULL}, it will be computed using LDSC if the LDSC paths are provided.}
 
-\item{h22block_path}{Path to the pre-computed jackknife blocks estimate for the heritability of the trait 2.}
+\item{h22_data}{Data frame or vector. Precomputed heritability estimates for the second trait.
+If \code{NULL}, it will be computed using LDSC if the LDSC paths are provided.}
 
-\item{gen_cov_path}{Path to the pre-computed jackknife blocks estimate for the genetic covariance between the traits.}
+\item{gencov_data}{Data frame or vector. Precomputed genetic covariance estimates.
+If \code{NULL}, it will be computed using LDSC if the LDSC paths are provided.}
 
-\item{tau}{Causal effect of the exposure on the outcome, as estimated by a robust Mendelian Randomization (MR) method.}
+\item{tau}{Numeric value. The causal effect to adjust the genetic covariance and heritability.}
 
-\item{intern}{Logical; if \code{TRUE}, captures the LDSC output internally when running the command.
-Defaults to \code{TRUE}.}
+\item{intern}{Logical. If \code{TRUE}, the LDSC command is run internally.}
 }
 \value{
-A list containing:
-\describe{
-\item{Estimates}{Estimates for heritabilities, genetic covariance, and genetic correlation (corrected and uncorrected).}
-\item{SE}{Standard errors for each estimate.}
-\item{p-values}{P-values associated with each estimate.}
-}
+A list containing the following:
+\item{means}{A named vector of means for heritability, genetic covariance, and correlation estimates.}
+\item{se}{A named vector of standard errors for the estimates.}
+\item{pvalues}{A named vector of p-values for the estimates.}
 }
 \description{
 This function applies the HVP model to disentangle horizontal pleiotropy effects from vertical pleiotropy using GWAS summary data. It corrects genetic correlation estimates derived from cross-trait LD-score regression (LDSC).
 }
 \details{
-The function operates in two modes:
-
-\strong{1. LDSC Mode}: If \code{ldsc_env_path}, \code{ldsc_exe_path}, \code{ld_path}, \code{sumstats1}, and \code{sumstats2} are provided,
-the function runs LDSC analysis to compute jackknife blocks estimates for heritability and genetic covariance for the input summary statistics.
-
-\strong{2. Pre-computed Mode}: If paths to jackknife blocks estimates (\code{h21block_path}, \code{h22block_path}, \code{gen_cov_path})
-are provided, the function performs downstream analysis without running LDSC.
-
-The downstream analysis computes the heritabilities, genetic covariance, and genetic correlation
-with and without corrections, along with their standard errors and p-values using pseudovalues.
+This function performs the following steps:
+\enumerate{
+\item If \code{ldsc_env_path}, \code{ldsc_exe_path}, and \code{ld_path} are provided, it runs the LDSC analysis to generate
+heritability and genetic covariance estimates.
+\item If precomputed data is provided for \code{h21_data}, \code{h22_data}, and \code{gencov_data}, these are used directly.
+\item It calculates corrected heritability, genetic covariance, and correlation, along with their associated p-values.
+\item It outputs the estimates, standard errors, and p-values for the corrected and uncorrected quantities.
+}
 }
 \examples{
-# Example using LDSC Mode
-#hvpsum(ldsc_env_path = "path/to/env//ldsc/bin/python", ldsc_exe_path = "path/to/ldsc.py", 
-#      ld_path = "path/to/ld", sumstats1 = "path/to/file1.sumstats.gz", 
-#       sumstats2 = "path/to/file2.sumstats.gz", tau = 0.5, intern = TRUE)
+# Example of using precomputed data
+#hvpsum(h21_data = h21_data, h22_data = h22_data, gencov_data = gencov_data, tau = 0.5)
 
-# Example using Precomputed Mode
-#hvpsum(h21block_path = "path/to/file1.hsq1.delete", h22block_path = "path/to/file2.hsq2.delete", 
-#       gen_cov_path = "path/to/file3.gencov.delete", tau = 0.5, intern = FALSE)
-
+# Example of running LDSC if paths are provided
+#hvpsum(ldsc_env_path = "/path/to/env", ldsc_exe_path = "/path/to/ldsc", 
+#       ld_path = "/path/to/ld", sumstats1 = "sumstats1.gz", sumstats2 = "sumstats2.gz", tau = 0.5)
 }

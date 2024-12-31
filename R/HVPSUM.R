@@ -1,59 +1,50 @@
 #' HVPSUM: Genetic Correlation
 #'
 #' This function applies the HVP model to disentangle horizontal pleiotropy effects from vertical pleiotropy using GWAS summary data. It corrects genetic correlation estimates derived from cross-trait LD-score regression (LDSC).
-#'
-#' @param ldsc_env_path Path to the LDSC environment.
-#' @param ldsc_exe_path Path to the LDSC executable script.
-#' @param ld_path Path to the reference LD files.
-#' @param sumstats1 Path to the first trait munged summary statistics file (outcome).
-#' @param sumstats2 Path to the second trait munged summary statistics file(exposure).
-#' @param h21block_path Path to the pre-computed jackknife blocks estimate  for the heritability of trait 1.
-#' @param h22block_path Path to the pre-computed jackknife blocks estimate for the heritability of the trait 2.
-#' @param gen_cov_path Path to the pre-computed jackknife blocks estimate for the genetic covariance between the traits.
-#' @param tau Causal effect of the exposure on the outcome, as estimated by a robust Mendelian Randomization (MR) method.
-#' @param intern Logical; if \code{TRUE}, captures the LDSC output internally when running the command. 
-#'               Defaults to \code{TRUE}.
-#'
-#' @return A list containing:
-#' \describe{
-#'   \item{Estimates}{Estimates for heritabilities, genetic covariance, and genetic correlation (corrected and uncorrected).}
-#'   \item{SE}{Standard errors for each estimate.}
-#'   \item{p-values}{P-values associated with each estimate.}
-#' }
-#'
-#' @details 
-#' The function operates in two modes:
+
+#' @param ldsc_env_path Character string. The path to the environment where LDSC is installed.
+#' @param ldsc_exe_path Character string. The path to the LDSC executable.
+#' @param ld_path Character string. The path to the reference LD blocks.
+#' @param sumstats1 Character string. Path to the first summary statistics file (e.g., .sumstats.gz).
+#' @param sumstats2 Character string. Path to the second summary statistics file (e.g., .sumstats.gz).
+#' @param h21_data Data frame or vector. Precomputed heritability estimates for the first trait. 
+#'   If `NULL`, it will be computed using LDSC if the LDSC paths are provided.
+#' @param h22_data Data frame or vector. Precomputed heritability estimates for the second trait.
+#'   If `NULL`, it will be computed using LDSC if the LDSC paths are provided.
+#' @param gencov_data Data frame or vector. Precomputed genetic covariance estimates.
+#'   If `NULL`, it will be computed using LDSC if the LDSC paths are provided.
+#' @param tau Numeric value. The causal effect to adjust the genetic covariance and heritability.
+#' @param intern Logical. If `TRUE`, the LDSC command is run internally.
 #' 
-#' \strong{1. LDSC Mode}: If \code{ldsc_env_path}, \code{ldsc_exe_path}, \code{ld_path}, \code{sumstats1}, and \code{sumstats2} are provided, 
-#' the function runs LDSC analysis to compute jackknife blocks estimates for heritability and genetic covariance for the input summary statistics.
+#' @return A list containing the following:
+#'   \item{means}{A named vector of means for heritability, genetic covariance, and correlation estimates.}
+#'   \item{se}{A named vector of standard errors for the estimates.}
+#'   \item{pvalues}{A named vector of p-values for the estimates.}
 #' 
-#' \strong{2. Pre-computed Mode}: If paths to jackknife blocks estimates (\code{h21block_path}, \code{h22block_path}, \code{gen_cov_path}) 
-#' are provided, the function performs downstream analysis without running LDSC.
+#' @details This function performs the following steps:
+#'   1. If `ldsc_env_path`, `ldsc_exe_path`, and `ld_path` are provided, it runs the LDSC analysis to generate 
+#'      heritability and genetic covariance estimates.
+#'   2. If precomputed data is provided for `h21_data`, `h22_data`, and `gencov_data`, these are used directly.
+#'   3. It calculates corrected heritability, genetic covariance, and correlation, along with their associated p-values.
+#'   4. It outputs the estimates, standard errors, and p-values for the corrected and uncorrected quantities.
 #' 
-#' The downstream analysis computes the heritabilities, genetic covariance, and genetic correlation 
-#' with and without corrections, along with their standard errors and p-values using pseudovalues.
-#'
 #' @examples
-#' # Example using LDSC Mode
-#' #hvpsum(ldsc_env_path = "path/to/env//ldsc/bin/python", ldsc_exe_path = "path/to/ldsc.py", 
-#' #      ld_path = "path/to/ld", sumstats1 = "path/to/file1.sumstats.gz", 
-#' #       sumstats2 = "path/to/file2.sumstats.gz", tau = 0.5, intern = TRUE)
+#' # Example of using precomputed data
+#' #hvpsum(h21_data = h21_data, h22_data = h22_data, gencov_data = gencov_data, tau = 0.5)
 #' 
-#' # Example using Precomputed Mode
-#' #hvpsum(h21block_path = "path/to/file1.hsq1.delete", h22block_path = "path/to/file2.hsq2.delete", 
-#' #       gen_cov_path = "path/to/file3.gencov.delete", tau = 0.5, intern = FALSE)
-#'
+#' # Example of running LDSC if paths are provided
+#' #hvpsum(ldsc_env_path = "/path/to/env", ldsc_exe_path = "/path/to/ldsc", 
+#' #       ld_path = "/path/to/ld", sumstats1 = "sumstats1.gz", sumstats2 = "sumstats2.gz", tau = 0.5)
 #' @importFrom stats var pchisq
 #' @importFrom utils read.table
 #' @export
-
-hvpsum <- function(ldsc_env_path = NULL, ldsc_exe_path = NULL, ld_path = NULL,sumstats1=NULL, sumstats2=NULL,
-h21block_path = NULL, h22block_path = NULL, gen_cov_path = NULL,
-tau, intern = TRUE) {
+hvpsum <- function(ldsc_env_path = NULL, ldsc_exe_path = NULL, ld_path = NULL, sumstats1 = NULL, sumstats2 = NULL,
+                   h21_data = NULL, h22_data = NULL, gencov_data = NULL,
+                   tau, intern = TRUE) {
   
- # Helper Function: Run LDSC
+  # Helper Function: Run LDSC
   run_ldsc <- function(ldsc_env_path, ldsc_exe_path, ld_path, sumstats1, sumstats2) {
-    #   # Construct and execute LDSC command
+    
     ldsc_command <- paste(
       ldsc_env_path, ldsc_exe_path,  # Use the path to the environment and LDSC script
       "--rg", paste0(basename(sumstats1), ",", basename(sumstats2)),  # Paths to the summary statistics files
@@ -69,106 +60,83 @@ tau, intern = TRUE) {
     h21_path <- file.path(getwd(),paste0(base_name, ".hsq1.delete"))
     h22_path <- file.path(getwd(),paste0(base_name, ".hsq2.delete"))
     gencov_path <- file.path(getwd(),paste0(base_name, ".gencov.delete"))
-    list(h21_path, h22_path, gencov_path)
     
+    if (!file.exists(h21_path) || !file.exists(h22_path) || !file.exists(gencov_path)) {
+      stop("LDSC output files are missing. Please check the LDSC command execution.")
     }
-
-  downstream_analysis <- function(h21_path , h22_path, gencov_path, tau) {
-   
-    dat1<- read.table(h21_path)$V1
-    dat2 <- read.table(h22_path)$V1
-    dat3 <- read.table(gencov_path)$V1
     
-   
-    data <- data.frame("hsq.1"=dat1, "hsq.2"=dat2, "gencov"=dat3)
-   
+    return(list(h21_path, h22_path, gencov_path))
+  }
+  
+  downstream_analysis <- function(h21_data, h22_data, gencov_data, tau) {
+    
+    if (is.null(h21_data) || is.null(h22_data) || is.null(gencov_data)) {
+      stop("Precomputed data not provided. Please supply the necessary data.")
+    }
+    
+    
+    
+    
+    data <- data.frame(as.numeric(h21_data$V1), as.numeric(h22_data$V1),  as.numeric(gencov_data$V1))
+    colnames(data)=c("hsq.1", "hsq.2", "gencov")
     data$gencov_corrected <- data$gencov - tau * data$hsq.2
     data$hsq1c_corrected <- data$hsq.1 - tau^2 * data$hsq.2 - 2 * tau * data$gencov_corrected
     data$cor <- data$gencov / sqrt(data$hsq.1 * data$hsq.2)
     data$cor_corrected <- data$gencov_corrected / sqrt(data$hsq1c_corrected * data$hsq.2)
     
-   
     blocks_est <- as.matrix(data)
     blocks_mean <- apply(blocks_est, 2, mean)
-    pseudo_values <- function(blocks_mean, blocks_est) {
-      n_blocks <- nrow(blocks_est)
-      p <- ncol(blocks_est)
-      pseudovalues <- matrix(0, n_blocks, p)
-      for (j in 1:n_blocks) {
-        for (k in 1:p) {
-          pseudovalues[j, k] <- n_blocks * blocks_mean[k] - (n_blocks - 1) * blocks_est[j, k]
-        }
+    
+    
+    pseudovalues <- matrix(0, nrow(blocks_est), ncol(blocks_est))
+    for (j in 1:nrow(blocks_est)) {
+      for (k in 1:ncol(blocks_est)) {
+        pseudovalues[j, k] <- nrow(blocks_est) * blocks_mean[k] - (nrow(blocks_est) - 1) * blocks_est[j, k]
       }
-      
-      return(pseudovalues)
     }
-    standard_error <- function(pseudovalues) {
-      n_blocks <- nrow(pseudovalues)
-      
-      variance <- apply(pseudovalues, 2, var)
-     
-      standard_error <- sqrt(variance / n_blocks)
-      return(standard_error)
-    }
-    pseudovalues <- pseudo_values(blocks_mean, blocks_est)
-    se=standard_error(pseudovalues)
-    names(se)=names(blocks_mean)
-   
-    pvalues <- sapply(seq_along(blocks_mean), function(i) {
-      z_score <- blocks_mean[i] / se[i]
-      pchisq((z_score)^2, 1,lower.tail=F)
-    })
     
     
-    list(
-      means = blocks_mean,
-      se = se,
-      pvalues = pvalues
-    )   
+    se <- sqrt(apply(pseudovalues, 2, var) / nrow(blocks_est))
+    pvalues <- sapply(1:length(blocks_mean), function(i) pchisq((blocks_mean[i] / se[i])^2, 1, lower.tail = FALSE))
+    
+    return(list(means = blocks_mean, se = se, pvalues = pvalues))
   }
   
   
   if (!is.null(ldsc_env_path) && !is.null(ldsc_exe_path) && !is.null(ld_path)) {
-    
     message("Running LDSC analysis...")
     Sys.setenv(PYTHONWARNINGS = "ignore::FutureWarning")
     ldsc_results <- run_ldsc(ldsc_env_path, ldsc_exe_path, ld_path, sumstats1, sumstats2)
-    
-    h21block_path <- ldsc_results[[1]]
-    h22block_path <- ldsc_results[[2]]
-    gen_cov_path <- ldsc_results[[3]]
-    
-  } else if (!is.null(h21block_path) && !is.null(h22block_path) && !is.null(gen_cov_path)) {
-    message("Using precomputed jacknife estimate for downstream analysis...")
-  } else {
-    stop("Please provide either Set 1 (LDSC inputs) or Set 2 (jacknife estimate paths).")
+    h21_data <- ldsc_results[[1]]
+    h22_data <- ldsc_results[[2]]
+    gencov_data <- ldsc_results[[3]]
+  } else if (is.null(h21_data) || is.null(h22_data) || is.null(gencov_data)) {
+    stop("Paths for block estimates or precomputed data are missing.")
   }
   
   
-  results <- downstream_analysis(h21block_path, h22block_path, gen_cov_path, tau)
+  downstream_results <- downstream_analysis(h21_data, h22_data, gencov_data, tau)
   
- 
-  cat("Heritability 1: Estimate =", round(results$means["hsq.1"], 4),
-      "SE =", round(results$se["hsq.1"], 4),
-      "P-value =", format.pval(results$pvalues["hsq.1"]), "\n")
-  cat("Heritability 1 Corrected: Estimate =", round(results$means["hsq1c_corrected"], 4),
-      "SE =", round(results$se["hsq1c_corrected"], 4),
-      "P-value =", format.pval(results$pvalues["hsq1c_corrected"]), "\n")
-  cat("Heritability 2: Estimate =", round(results$means["hsq.2"], 4),
-      "SE =", round(results$se["hsq.2"], 4),
-      "P-value =", format.pval(results$pvalues["hsq.2"]), "\n")
-  cat("Genetic Covariance: Estimate =", round(results$means["gencov"], 4),
-      "SE =", round(results$se["gencov"], 4),
-      "P-value =", format.pval(results$pvalues["gencov"]), "\n")
-  cat("Genetic Covariance Corrected: Estimate =", round(results$means["gencov_corrected"], 4),
-      "SE =", round(results$se["gencov_corrected"], 4),
-      "P-value =", format.pval(results$pvalues["gencov_corrected"]), "\n")
-  cat("Genetic Correlation: Estimate =", round(results$means["cor"], 4),
-      "SE =", round(results$se["cor"], 4),
-      "P-value =", format.pval(results$pvalues["cor"]), "\n")
-  cat("Genetic Correlation: Estimate =", round(results$means["cor_corrected"], 4),
-      "SE =", round(results$se["cor_corrected"], 4),
-      "P-value =", format.pval(results$pvalues["cor_corrected"]), "\n")
   
-   invisible(results)
+  cat(sprintf("Heritability 1: Estimate = %.4f, SE = %.4f, P-value = %s\n", 
+              downstream_results$means["hsq.1"], downstream_results$se["hsq.1"], 
+              format.pval(downstream_results$pvalues["hsq.1"])))
+  cat(sprintf("Heritability 1 Corrected: Estimate = %.4f, SE = %.4f, P-value = %s\n", 
+              downstream_results$means["hsq1c_corrected"], downstream_results$se["hsq1c_corrected"], 
+              format.pval(downstream_results$pvalues["hsq1c_corrected"])))
+  cat(sprintf("Heritability 2: Estimate = %.4f, SE = %.4f, P-value = %s\n", 
+              downstream_results$means["hsq.2"], downstream_results$se["hsq.2"], 
+              format.pval(downstream_results$pvalues["hsq.2"])))
+  cat(sprintf("Genetic Covariance: Estimate = %.4f, SE = %.4f, P-value = %s\n", 
+              downstream_results$means["gencov"], downstream_results$se["gencov"], 
+              format.pval(downstream_results$pvalues["gencov"])))
+  cat(sprintf("Genetic Covariance Corrected: Estimate = %.4f, SE = %.4f, P-value = %s\n", 
+              downstream_results$means["gencov_corrected"], downstream_results$se["gencov_corrected"], 
+              format.pval(downstream_results$pvalues["gencov_corrected"])))
+  cat(sprintf("Genetic Correlation: Estimate = %.4f, SE = %.4f, P-value = %s\n", 
+              downstream_results$means["cor"], downstream_results$se["cor"], 
+              format.pval(downstream_results$pvalues["cor"])))
+  cat(sprintf("Genetic Correlation Corrected: Estimate = %.4f, SE = %.4f, P-value = %s\n", 
+              downstream_results$means["cor_corrected"], downstream_results$se["cor_corrected"], 
+              format.pval(downstream_results$pvalues["cor_corrected"])))
 }

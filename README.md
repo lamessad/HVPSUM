@@ -45,11 +45,19 @@ devtools::install_github("lamessad/HVPSUM")
 
 ## 3. Apply the HVPSUM
 
-- This package operates in two distinct modes, and the required
-  **inputs** depend on the selected mode:
+- This r package performs the following steps:
+  - 1.  If `ldsc_env_path`, `ldsc_exe_path`, and `ld_path` are provided,
+        it runs the LDSC analysis to generate heritability and genetic
+        covariance estimates.
+  - 2.  If precomputed data is provided for `h21_data`, `h22_data`, and
+        `gencov_data`, these are used directly.
+  - 3.  It calculates corrected heritability, genetic covariance, and
+        correlation, along with their associated p-values.
+  - 4.  It outputs the estimates, standard errors, and p-values for the
+        corrected and uncorrected quantities.
 
-- 1.  `**LDSC Mode**`: In this mode, the package performs LDSC analysis
-      to compute delete values for the input summary statistics. The
+- 1.  `LDSC Mode`: In this mode, the package performs LDSC analysis to
+      compute delete values for the input summary statistics. The
       following inputs must be provided:
 
   - `ldsc_env_path`: Path to the LDSC environment.
@@ -61,16 +69,24 @@ devtools::install_github("lamessad/HVPSUM")
 When these paths are provided, the package will execute LDSC analysis
 and compute the necessary delete values.
 
-- 2.  `**Pre-computed Mode**`: In this mode, the package performs the
+``` r
+@examples
+# Example using LDSC Mode
+#hvpsum(ldsc_env_path = "path/to/env//ldsc/bin/python", ldsc_exe_path = "path/to/ldsc.py", 
+#      ld_path = "path/to/ld", sumstats1 = "path/to/file1.sumstats.gz", 
+#       sumstats2 = "path/to/file2.sumstats.gz", tau = 0.5, intern = TRUE)
+```
+
+- 2.  `Pre-computed Mode`: In this mode, the package performs the
       analysis without running LDSC in this rpackage. Instead, it uses
       pre-computed delete values from LDSC computed else where. The
       following inputs must be provided:
 
-  - `h21block_path`: Path to the pre-computed `hertability` blocks
-    estemates for trait 1(outcome).
-  - `h22block_path`: Path to the pre-computed `hertability` blocks
-    estemates for trait 2(exposure).
-  - `gen_cov_path`: Path to the pre-computed `genetic covariance` for
+  - `h21_data`: pre-computed `hertability` blocks estemates for trait
+    1(outcome).
+  - `h22_data`: pre-computed `hertability` blocks estemates for trait
+    2(exposure).
+  - `gencov_data`: pre-computed `genetic covariance` estimates for
     blocks.
 
 If these paths are provided, the package will bypass the LDSC analysis
@@ -107,16 +123,17 @@ head(dat3)
 #> 4 0.04297755
 #> 5 0.04302241
 #> 6 0.04294928
-tau <- 0.21
-#results <- hvpsum(h21block_path = "path/to/file1.hsq1.delete", h22block_path = "path/to/file2.hsq2.delete", gen_cov_path = "path/to/file3.gencov.delete",tau=tau)
-#results
-#Heritability 1: Estimate = 0.0991 SE = 0.0309 P-value = 0.001333
-#Heritability 1 Corrected: Estimate = 0.1005 SE = 0.0313 P-value = 0.0013128
-#Heritability 2: Estimate = 0.0753 SE = 0.0086 P-value = < 2.22e-16
-#Genetic Covariance: Estimate = -0.0045 SE = 0.0049 P-value = 0.35232
-#Genetic Covariance Corrected: Estimate = 0.0113 SE = 0.005 P-value = 0.023646
-#Genetic Correlation: Estimate = -0.0523 SE = 0.0588 P-value = 0.37434
-#Genetic Correlation: Estimate = 0.1299 SE = 0.0553 P-value = 0.01876
+tau <- as.numeric(0.21)
+results <- hvpsum(h21_data = dat1, h22_data = dat2, gencov_data = dat3,tau=tau)
+#> Heritability 1: Estimate = 0.0753, SE = NA, P-value = < 2.22e-16
+#> Heritability 1 Corrected: Estimate = 0.0594, SE = NA, P-value = 5.9497e-15
+#> Heritability 2: Estimate = 0.0460, SE = NA, P-value = 1.1615e-12
+#> Genetic Covariance: Estimate = 0.0428, SE = NA, P-value = 3.203e-14
+#> Genetic Covariance Corrected: Estimate = 0.0331, SE = NA, P-value = 2.6609e-10
+#> Genetic Correlation: Estimate = 0.7269, SE = NA, P-value = < 2.22e-16
+#> Genetic Correlation Corrected: Estimate = 0.6339, SE = NA, P-value = 6.2006e-10
+results
+#> NULL
 ```
 
 ## Contact
