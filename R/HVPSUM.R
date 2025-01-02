@@ -97,6 +97,7 @@ hvpsum <- function(ldsc_env_path = NULL, ldsc_exe_path = NULL, ld_path = NULL, s
     
     
     se <- sqrt(apply(pseudovalues, 2, var) / nrow(blocks_est))
+    names(se) <- names(blocks_mean)
     pvalues <- sapply(1:length(blocks_mean), function(i) pchisq((blocks_mean[i] / se[i])^2, 1, lower.tail = FALSE))
     
     return(list(means = blocks_mean, se = se, pvalues = pvalues))
