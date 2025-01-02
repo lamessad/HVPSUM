@@ -77,7 +77,7 @@ This R package performs the following steps:
 
    The outputs include estimates, standard errors, and p-values for corrected and uncorrected parameters.
 
-   ```r
+   ```{r}
    library(HVPSUM)
    data("dat1")
    data("dat2")
@@ -86,8 +86,8 @@ This R package performs the following steps:
    head(dat2)
    head(dat3)
    tau <- 0.21
-   results <- hvpsum(h21_data = dat1, h22_data = dat2, gencov_data = dat3, tau = tau)
-   results
+   hvpsum(h21_data = dat1, h22_data = dat2, gencov_data = dat3, tau = tau)
+   
    ```
 
 ## Contact

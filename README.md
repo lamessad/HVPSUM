@@ -92,11 +92,38 @@ This R package performs the following steps:
     data("dat2")
     data("dat3")
     head(dat1)
+    #>           V1
+    #> 1 0.07696392
+    #> 2 0.07642106
+    #> 3 0.07556504
+    #> 4 0.07559329
+    #> 5 0.07599179
+    #> 6 0.07575593
     head(dat2)
+    #>           V1
+    #> 1 0.04595247
+    #> 2 0.04651566
+    #> 3 0.04587754
+    #> 4 0.04633127
+    #> 5 0.04651247
+    #> 6 0.04634499
     head(dat3)
+    #>           V1
+    #> 1 0.04297810
+    #> 2 0.04307912
+    #> 3 0.04293479
+    #> 4 0.04297755
+    #> 5 0.04302241
+    #> 6 0.04294928
     tau <- 0.21
-    results <- hvpsum(h21_data = dat1, h22_data = dat2, gencov_data = dat3, tau = tau)
-    results
+    hvpsum(h21_data = dat1, h22_data = dat2, gencov_data = dat3, tau = tau)
+    #> Heritability 1: Estimate = 0.0753, SE = 0.0086, P-value = < 2.22e-16
+    #> Heritability 1 Corrected: Estimate = 0.0594, SE = 0.0076, P-value = 5.9497e-15
+    #> Heritability 2: Estimate = 0.0460, SE = 0.0065, P-value = 1.1615e-12
+    #> Genetic Covariance: Estimate = 0.0428, SE = 0.0056, P-value = 3.203e-14
+    #> Genetic Covariance Corrected: Estimate = 0.0331, SE = 0.0052, P-value = 2.6609e-10
+    #> Genetic Correlation: Estimate = 0.7269, SE = 0.0796, P-value = < 2.22e-16
+    #> Genetic Correlation Corrected: Estimate = 0.6339, SE = 0.1025, P-value = 6.2006e-10
     ```
 
 ## Contact
