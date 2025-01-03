@@ -51,20 +51,11 @@ A list containing the following:
 This function applies the HVP model to disentangle horizontal pleiotropy effects from vertical pleiotropy using GWAS summary data. It corrects genetic correlation estimates derived from cross-trait LD-score regression (LDSC).
 }
 \details{
-This function performs the following steps:
+This r package performs the following steps:
 \enumerate{
 \item If \code{ldsc_env_path}, \code{ldsc_exe_path}, and \code{ld_path} are provided, it runs the LDSC analysis to generate
-heritability and genetic covariance estimates.
+heritability and genetic covariance estimates based on summary statistics provided.
 \item If precomputed data is provided for \code{h21_data}, \code{h22_data}, and \code{gencov_data}, these are used directly.
-\item It calculates corrected heritability, genetic covariance, and correlation, along with their associated p-values.
-\item It outputs the estimates, standard errors, and p-values for the corrected and uncorrected quantities.
+\item Calculates and returns the estimates, standard errors, and p-values for the corrected and uncorrected parameters.
 }
-}
-\examples{
-# Example of using precomputed data
-#hvpsum(h21_data = h21_data, h22_data = h22_data, gencov_data = gencov_data, tau = 0.5)
-
-# Example of running LDSC if paths are provided
-#hvpsum(ldsc_env_path = "/path/to/env", ldsc_exe_path = "/path/to/ldsc", 
-#       ld_path = "/path/to/ld", sumstats1 = "sumstats1.gz", sumstats2 = "sumstats2.gz", tau = 0.5)
 }

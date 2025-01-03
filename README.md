@@ -62,15 +62,14 @@ This R package performs the following steps:
     analysis and compute the necessary delete values.
 
     ``` r
-    @examples
     # Example using LDSC Mode
-    # hvpsum(ldsc_env_path = "path/to/env/ldsc/bin/python", 
-    #        ldsc_exe_path = "path/to/ldsc.py", 
-    #        ld_path = "path/to/ld", 
-    #        sumstats1 = "path/to/file1.sumstats.gz", 
-    #        sumstats2 = "path/to/file2.sumstats.gz", 
-    #        tau = 0.5, 
-    #        intern = TRUE)
+    # library(HVPSUM)
+    # hvpsum(ldsc_env_path = "/data/alh-admlda/anaconda3/envs/ldsc/bin/python", 
+    #        ldsc_exe_path = "./ldsc.py", 
+    #        ld_path = "/data/alh-admlda/ldsc/eur_w_ld_chr/", 
+    #        sumstats1 = "DM2.sumstats.gz", 
+    #        sumstats2 = "mets.sumstats.gz", 
+    #        tau = 0.21)
     ```
 
 2.  **Pre-computed Mode**: If pre-computed data are provided for
@@ -117,13 +116,13 @@ This R package performs the following steps:
     #> 6 0.04294928
     tau <- 0.21
     hvpsum(h21_data = dat1, h22_data = dat2, gencov_data = dat3, tau = tau)
-    #> Heritability 1: Estimate = 0.0753, SE = 0.0086, P-value = < 2.22e-16
-    #> Heritability 1 Corrected: Estimate = 0.0594, SE = 0.0076, P-value = 5.9497e-15
-    #> Heritability 2: Estimate = 0.0460, SE = 0.0065, P-value = 1.1615e-12
-    #> Genetic Covariance: Estimate = 0.0428, SE = 0.0056, P-value = 3.203e-14
-    #> Genetic Covariance Corrected: Estimate = 0.0331, SE = 0.0052, P-value = 2.6609e-10
-    #> Genetic Correlation: Estimate = 0.7269, SE = 0.0796, P-value = < 2.22e-16
-    #> Genetic Correlation Corrected: Estimate = 0.6339, SE = 0.1025, P-value = 6.2006e-10
+    #> Heritability 1: Estimate = 0.0753, SE = 0.0000, P-value = < 2.22e-16
+    #> Heritability 1 Corrected: Estimate = 0.0594, SE = 0.0000, P-value = < 2.22e-16
+    #> Heritability 2: Estimate = 0.0460, SE = 0.0000, P-value = < 2.22e-16
+    #> Genetic Covariance: Estimate = 0.0428, SE = 0.0000, P-value = < 2.22e-16
+    #> Genetic Covariance Corrected: Estimate = 0.0331, SE = 0.0000, P-value = < 2.22e-16
+    #> Genetic Correlation: Estimate = 0.7269, SE = 0.0000, P-value = < 2.22e-16
+    #> Genetic Correlation Corrected: Estimate = 0.6339, SE = 0.0000, P-value = < 2.22e-16
     ```
 
 ## Contact

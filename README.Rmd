@@ -58,15 +58,14 @@ This R package performs the following steps:
    When these paths are provided, the package will execute LDSC analysis and compute the necessary delete values.
 
    ```r
-   @examples
    # Example using LDSC Mode
-   # hvpsum(ldsc_env_path = "path/to/env/ldsc/bin/python", 
-   #        ldsc_exe_path = "path/to/ldsc.py", 
-   #        ld_path = "path/to/ld", 
-   #        sumstats1 = "path/to/file1.sumstats.gz", 
-   #        sumstats2 = "path/to/file2.sumstats.gz", 
-   #        tau = 0.5, 
-   #        intern = TRUE)
+   # library(HVPSUM)
+   # hvpsum(ldsc_env_path = "/data/alh-admlda/anaconda3/envs/ldsc/bin/python", 
+   #        ldsc_exe_path = "./ldsc.py", 
+   #        ld_path = "/data/alh-admlda/ldsc/eur_w_ld_chr/", 
+   #        sumstats1 = "DM2.sumstats.gz", 
+   #        sumstats2 = "mets.sumstats.gz", 
+   #        tau = 0.21)
    ```
 
 2. **Pre-computed Mode**: If pre-computed data are provided for `h21_data`, `h22_data`, and `gencov_data`, these are used directly to bypass the LDSC analysis. The required inputs are:
