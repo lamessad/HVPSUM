@@ -76,9 +76,19 @@ hvpsum <- function(ldsc_env_path = NULL, ldsc_exe_path = NULL, ld_path = NULL, s
     data$cor_corrected <- data$gencov_corrected / sqrt(data$hsq1c_corrected * data$hsq.2)
     
     # Mean, pseudovalues, and SE calculations
-    blocks_mean <- colMeans(data)
-    pseudovalues <- sweep(data, 2, blocks_mean * nrow(data), `-`) / (nrow(data) - 1)
-    se <- sqrt(apply(pseudovalues, 2, var) / nrow(data))
+    blocks_est <- as.matrix(data)
+    blocks_mean <- apply(blocks_est, 2, mean)
+    
+    
+    pseudovalues <- matrix(0, nrow(blocks_est), ncol(blocks_est))
+    for (j in 1:nrow(blocks_est)) {
+      for (k in 1:ncol(blocks_est)) {
+        pseudovalues[j, k] <- nrow(blocks_est) * blocks_mean[k] - (nrow(blocks_est) - 1) * blocks_est[j, k]
+      }
+    }
+    
+    
+    se <- sqrt(apply(pseudovalues, 2, var) / nrow(blocks_est))
     names(se) <- names(blocks_mean)
     pvalues <- sapply(1:length(blocks_mean), function(i) pchisq((blocks_mean[i] / se[i])^2, 1, lower.tail = FALSE))
     
