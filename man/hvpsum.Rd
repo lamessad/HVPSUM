@@ -15,7 +15,7 @@ hvpsum(
   gencov = NULL,
   tau,
   intern = TRUE,
-  temp_files = TRUE
+  remove_temp_files = TRUE
 )
 }
 \arguments{
@@ -42,7 +42,7 @@ If \code{NULL}, these estimates will be computed using LDSC if the required LDSC
 
 \item{intern}{Logical. If \code{TRUE}, the LDSC command will be executed internally.}
 
-\item{temp_files}{Logical. Whether to delete temporary files after the analysis (default is TRUE).}
+\item{remove_temp_files}{Logical. Whether to delete temporary files after the analysis (default is TRUE).}
 }
 \value{
 A list containing the following:

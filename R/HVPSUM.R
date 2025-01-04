@@ -15,7 +15,8 @@
 #'   If `NULL`, these estimates will be computed using LDSC if the required LDSC paths are provided.
 #' @param tau Numeric. The causal effect estimate from a Mendelian Randomization (MR) method, used to adjust the genetic covariance and heritability estimates.
 #' @param intern Logical. If `TRUE`, the LDSC command will be executed internally.
-#' @param temp_files Logical. Whether to delete temporary files after the analysis (default is TRUE).
+#' @param remove_temp_files Logical. Whether to delete temporary files after the analysis (default is TRUE).
+#' 
 #' @return A list containing the following:
 #'   \item{means}{A named vector of means for heritability, genetic covariance, and correlation estimates.}
 #'   \item{se}{A named vector of standard errors for the estimates.}
@@ -26,7 +27,7 @@
 #' @export
 hvpsum <- function(ldsc_env_path = NULL, ldsc_exe_path = NULL, ld_path = NULL, sumstats_outcome = NULL, sumstats_exposure = NULL,
                    h2_outcome = NULL, h2_exposure = NULL, gencov = NULL,
-                   tau, intern = TRUE, temp_files = TRUE) {
+                   tau, intern = TRUE, remove_temp_files = TRUE ) {
   
   # Helper Function: Run LDSC
   run_ldsc <- function(ldsc_env_path, ldsc_exe_path, ld_path, sumstats_outcome, sumstats_exposure) {
@@ -47,10 +48,15 @@ hvpsum <- function(ldsc_env_path = NULL, ldsc_exe_path = NULL, ld_path = NULL, s
     h2_exposure_path <- file.path(getwd(),paste0(base_name, ".hsq2.delete"))
     gencov_path <- file.path(getwd(),paste0(base_name, ".gencov.delete"))
     
-    file_path <- return(list(h2_outcome_path = h2_outcome_path, h2_exposure_path = h2_exposure_path, gencov_path = gencov_path))
+    return(list(h2_outcome_path = h2_outcome_path, h2_exposure_path = h2_exposure_path, gencov_path = gencov_path))
   }
   
-  
+  remove_files <- function(file_paths) {
+    unlink(file_paths$h2_outcome_path)
+    unlink(file_paths$h2_exposure_path)  
+    unlink(file_paths$gencov_path)
+    message("Temporary files deleted.")
+  }
   downstream_analysis <- function(h2_outcome, h2_exposure, gencov, tau) {
     # Validate inputs
     if (is.null(h2_outcome) || is.null(h2_exposure) || is.null(gencov)) {
@@ -89,19 +95,19 @@ hvpsum <- function(ldsc_env_path = NULL, ldsc_exe_path = NULL, ld_path = NULL, s
     return(list(means = blocks_mean, se = se, pvalues = pvalues))
   }
   
-  # Main Logic
+  file_paths <- NULL
   if (!is.null(ldsc_env_path) && !is.null(ldsc_exe_path) && !is.null(ld_path)) {
     message("Running LDSC analysis...")
     Sys.setenv(PYTHONWARNINGS = "ignore::FutureWarning")
     file_paths <- run_ldsc(ldsc_env_path, ldsc_exe_path, ld_path, sumstats_outcome, sumstats_exposure)
     
     # Validate intermediate files
-    if (!file.exists(file_paths$h2_outcome_path) || !file.exists(file_paths$h2_exposue_path) || !file.exists(file_paths$gencov_path)) {
+    if (!file.exists(file_paths$h2_outcome_path) || !file.exists(file_paths$h2_exposure_path) || !file.exists(file_paths$gencov_path)) {
       stop("Intermediate files from LDSC analysis not found.")
     }
     
     h2_outcome <- read.table(file_paths$h2_outcome_path)
-    h2_exposure <- read.table(file_paths$h2_exposue_path)
+    h2_exposure <- read.table(file_paths$h2_exposure_path)
     gencov <- read.table(file_paths$gencov_path)
   } else if (is.null(h2_outcome) || is.null(h2_exposure) || is.null(gencov)) {
     stop("Precomputed data or paths for LDSC analysis are missing.")
@@ -109,9 +115,7 @@ hvpsum <- function(ldsc_env_path = NULL, ldsc_exe_path = NULL, ld_path = NULL, s
   
   # Perform downstream analysis
   downstream_results <- downstream_analysis(h2_outcome, h2_exposure, gencov, tau)
-  
-  
-  
+  file_paths<- file_paths
   cat(sprintf("%-32s: Estimate = %.4f, SE = %.4f, P-value = %s\n", 
               "h2 outcome", downstream_results$means["hsq.1"], 
               downstream_results$se["hsq.1"], 
@@ -141,5 +145,7 @@ hvpsum <- function(ldsc_env_path = NULL, ldsc_exe_path = NULL, ld_path = NULL, s
               downstream_results$se["cor_corrected"], 
               format.pval(downstream_results$pvalues["cor_corrected"])))
 
-  
+  if (remove_temp_files && !is.null(file_paths)) {
+    remove_files(file_paths)
+  }
 }
