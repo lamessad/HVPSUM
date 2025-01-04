@@ -48,44 +48,50 @@ devtools::install_github("lamessad/HVPSUM")
 This R package performs the following steps:
 
 1.  **LDSC Mode**: If `ldsc_env_path`, `ldsc_exe_path`, `ld_path`, and
-    munged `sumstat` are provided, it runs the LDSC analysis to generate
-    heritability and genetic covariance estimates. The required inputs
-    are:
+    munged `summary data` are provided, the package performs LDSC
+    analysis to estimate heritability and genetic covariance for each
+    block using jackknife resampling. The required inputs are:
 
     - `ldsc_env_path`: Path to the LDSC environment.
     - `ldsc_exe_path`: Path to the LDSC executable.
-    - `ld_path`: Path to the LD data.
-    - `sumstats1`: Path to the munged summary data of outcome.
-    - `sumstats2`: Path to the munged summary data of exposure.
+    - `ld_path`: Path to the reference LD data.
+    - `sumstats_outcome`: Path to the munged summary statistics file for
+      the outcome trait.
+    - `sumstats_exposure`: Path to the munged summary statistics file
+      for the exposure trait.
 
     When these paths are provided, the package will execute LDSC
-    analysis and compute the necessary delete values.
+    analysis and compute the necessary block estimates from the
+    jackknife resampling.
 
     ``` r
     # Example using LDSC Mode
-    # library(HVPSUM)
-    # hvpsum(ldsc_env_path = "/data/alh-admlda/anaconda3/envs/ldsc/bin/python", 
-    #        ldsc_exe_path = "./ldsc.py", 
+    #library(HVPSUM)
+    #hvpsum(ldsc_env_path = "/data/alh-admlda/anaconda3/envs/ldsc/bin/python", 
+    #        ldsc_exe_path = "/data/alh-admlda/ldsc/ldsc.py",                   
     #        ld_path = "/data/alh-admlda/ldsc/eur_w_ld_chr/", 
-    #        sumstats1 = "DM2.sumstats.gz", 
-    #        sumstats2 = "mets.sumstats.gz", 
+    #        sumstats_outcome = "/data/alh-admlda/DM2.sumstats.gz", 
+    #        sumstats_exposure = "/data/alh-admlda/mets.sumstats.gz", 
     #        tau = 0.21)
     ```
 
 2.  **Pre-computed Mode**: If pre-computed data are provided for
-    `h21_data`, `h22_data`, and `gencov_data`, these are used directly
+    `h2_outcome`, `h2_exposure`, and `gencov`, these are used directly
     to bypass the LDSC analysis. The required inputs are:
 
-    - `h21_data`: Pre-computed heritability block estimates for trait 1
-      (outcome).
-    - `h22_data`: Pre-computed heritability block estimates for trait 2
-      (exposure).
-    - `gencov_data`: Pre-computed genetic covariance block estimates.
+    - `h2_outcome`: Pre-computed heritability estimates for each block
+      for the outcome.
+    - `h2_exposure`: Pre-computed heritability estimates for each block
+      for the exposure.
+    - `gencov`: Pre-computed genetic covariance estimates for each
+      block.
 
     The outputs include estimates, standard errors, and p-values for
     corrected and uncorrected parameters.
 
     ``` r
+    #Example using Pre-computed Mode
+
     library(HVPSUM)
     data("dat1")
     data("dat2")
@@ -115,14 +121,14 @@ This R package performs the following steps:
     #> 5 0.04302241
     #> 6 0.04294928
     tau <- 0.21
-    hvpsum(h21_data = dat1, h22_data = dat2, gencov_data = dat3, tau = tau)
-    #> Heritability 1: Estimate = 0.0753, SE = 0.0086, P-value = < 2.22e-16
-    #> Heritability 1 Corrected: Estimate = 0.0594, SE = 0.0076, P-value = 5.9497e-15
-    #> Heritability 2: Estimate = 0.0460, SE = 0.0065, P-value = 1.1615e-12
-    #> Genetic Covariance: Estimate = 0.0428, SE = 0.0056, P-value = 3.203e-14
-    #> Genetic Covariance Corrected: Estimate = 0.0331, SE = 0.0052, P-value = 2.6609e-10
-    #> Genetic Correlation: Estimate = 0.7269, SE = 0.0796, P-value = < 2.22e-16
-    #> Genetic Correlation Corrected: Estimate = 0.6339, SE = 0.1025, P-value = 6.2006e-10
+    hvpsum(h2_outcome = dat1, h2_exposure = dat2, gencov = dat3, tau =tau)   
+    #> h2 outcome                      : Estimate = 0.0753, SE = 0.0086, P-value = < 2.22e-16
+    #> h2 outcome (corrected)          : Estimate = 0.0594, SE = 0.0076, P-value = 5.9497e-15
+    #> h2 exposure                     : Estimate = 0.0460, SE = 0.0065, P-value = 1.1615e-12
+    #> Genetic Covariance              : Estimate = 0.0428, SE = 0.0056, P-value = 3.203e-14
+    #> Genetic Covariance (corrected)  : Estimate = 0.0331, SE = 0.0052, P-value = 2.6609e-10
+    #> Genetic Correlation             : Estimate = 0.7269, SE = 0.0796, P-value = < 2.22e-16
+    #> Genetic Correlation (corrected) : Estimate = 0.6339, SE = 0.1025, P-value = 6.2006e-10
     ```
 
 ## Contact

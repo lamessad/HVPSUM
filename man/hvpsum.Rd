@@ -2,44 +2,47 @@
 % Please edit documentation in R/HVPSUM.R
 \name{hvpsum}
 \alias{hvpsum}
-\title{HVPSUM: Genetic Correlation}
+\title{HVPSUM: Adjusting Genetic Correlation for Horizontal and Vertical Pleiotropy}
 \usage{
 hvpsum(
   ldsc_env_path = NULL,
   ldsc_exe_path = NULL,
   ld_path = NULL,
-  sumstats1 = NULL,
-  sumstats2 = NULL,
-  h21_data = NULL,
-  h22_data = NULL,
-  gencov_data = NULL,
+  sumstats_outcome = NULL,
+  sumstats_exposure = NULL,
+  h2_outcome = NULL,
+  h2_exposure = NULL,
+  gencov = NULL,
   tau,
-  intern = TRUE
+  intern = TRUE,
+  temp_files = TRUE
 )
 }
 \arguments{
 \item{ldsc_env_path}{Character string. The path to the environment where LDSC is installed.}
 
-\item{ldsc_exe_path}{Character string. The path to the LDSC executable.}
+\item{ldsc_exe_path}{Character string. The path to the LDSC executable file.}
 
 \item{ld_path}{Character string. The path to the reference LD blocks.}
 
-\item{sumstats1}{Character string. Path to the first summary statistics file (e.g., .sumstats.gz).}
+\item{sumstats_outcome}{Character string. The file path to the munged outcome summary statistics (e.g., a \code{.sumstats.gz} file).}
 
-\item{sumstats2}{Character string. Path to the second summary statistics file (e.g., .sumstats.gz).}
+\item{sumstats_exposure}{Character string. The file path to the munged exposure summary statistics (e.g., a \code{.sumstats.gz} file).}
 
-\item{h21_data}{Data frame or vector. Precomputed heritability estimates for the first trait.
-If \code{NULL}, it will be computed using LDSC if the LDSC paths are provided.}
+\item{h2_outcome}{Data frame or vector. Precomputed heritability block estimates from jackknife resampling for the outcome trait.
+If \code{NULL}, these estimates will be computed using LDSC if the required LDSC paths are provided.}
 
-\item{h22_data}{Data frame or vector. Precomputed heritability estimates for the second trait.
-If \code{NULL}, it will be computed using LDSC if the LDSC paths are provided.}
+\item{h2_exposure}{Data frame or vector. Precomputed heritability block estimates from jackknife resampling for the exposure trait.
+If \code{NULL}, these estimates will be computed using LDSC if the required LDSC paths are provided.}
 
-\item{gencov_data}{Data frame or vector. Precomputed genetic covariance estimates.
-If \code{NULL}, it will be computed using LDSC if the LDSC paths are provided.}
+\item{gencov}{Data frame or vector. Precomputed genetic covariance block estimates from jackknife resampling.
+If \code{NULL}, these estimates will be computed using LDSC if the required LDSC paths are provided.}
 
-\item{tau}{Numeric value. The causal effect to adjust the genetic covariance and heritability.}
+\item{tau}{Numeric. The causal effect estimate from a Mendelian Randomization (MR) method, used to adjust the genetic covariance and heritability estimates.}
 
-\item{intern}{Logical. If \code{TRUE}, the LDSC command is run internally.}
+\item{intern}{Logical. If \code{TRUE}, the LDSC command will be executed internally.}
+
+\item{temp_files}{Logical. Whether to delete temporary files after the analysis (default is TRUE).}
 }
 \value{
 A list containing the following:
@@ -48,14 +51,5 @@ A list containing the following:
 \item{pvalues}{A named vector of p-values for the estimates.}
 }
 \description{
-This function applies the HVP model to disentangle horizontal pleiotropy effects from vertical pleiotropy using GWAS summary data. It corrects genetic correlation estimates derived from cross-trait LD-score regression (LDSC).
-}
-\details{
-This r package performs the following steps:
-\enumerate{
-\item If \code{ldsc_env_path}, \code{ldsc_exe_path}, and \code{ld_path} are provided, it runs the LDSC analysis to generate
-heritability and genetic covariance estimates based on summary statistics provided.
-\item If precomputed data is provided for \code{h21_data}, \code{h22_data}, and \code{gencov_data}, these are used directly.
-\item Calculates and returns the estimates, standard errors, and p-values for the corrected and uncorrected parameters.
-}
+This function applies the HVP model to disentangle horizontal pleiotropy effects from vertical pleiotropy using GWAS summary statistics. It adjusts genetic correlation estimates obtained from cross-trait LD-score regression (LDSC).
 }
